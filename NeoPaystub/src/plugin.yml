@@ -1,0 +1,11 @@
+name: NeoBase
+main: me.neoblade298.base.Main
+author: [Neoblade298]
+depend: [NeoCore]
+version: 1.0
+api-version: 1.16
+commands:
+   disenchant:
+      description: This command allows you to disenchant item in hand
+      usage: /disenchant
+      permission: disenchant.true
