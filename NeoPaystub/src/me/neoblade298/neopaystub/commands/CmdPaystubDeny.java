@@ -15,7 +15,7 @@ public class CmdPaystubDeny extends Subcommand {
 
 	public CmdPaystubDeny(String key, String desc, String perm, SubcommandRunner runner) {
 		super(key, desc, perm, runner);
-		args.add(new Arg("id"), new Arg("reason"));
+		args.add(new Arg("id"), new Arg("reason", false));
 		args.setMax(-1);
 		color = ChatColor.DARK_RED;
 	}
@@ -23,10 +23,19 @@ public class CmdPaystubDeny extends Subcommand {
 	@Override
 	public void run(CommandSender s, String[] args) {
 		int id = Integer.parseInt(args[0]);
-		String reason = SharedUtil.connectArgs(args, 1);
+		String reason = args.length > 1 ? SharedUtil.connectArgs(args, 1) : "No reason provided";
 		PayRequest req = NeoPaystub.getRequests().remove((r) -> {
 			return id - r.getId();
 		});
+		if (req == null) {
+			Util.msg(s, "&cThat pay request doesn't exist! Maybe it was already processed?");
+			return;
+		}
+		if (req.isProcessed()) {
+			Util.msg(s, "&cThat pay request was already processed!");
+			return;
+		}
+		req.process(false);
 		Util.msg(s, "&cDenied pay request " + req.getId());
 		ProxiedPlayer recipient = NeoPaystub.inst().getProxy().getPlayer(req.getUniqueId());
 		if (recipient != null) {

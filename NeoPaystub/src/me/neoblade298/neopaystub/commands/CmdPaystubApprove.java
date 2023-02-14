@@ -24,14 +24,23 @@ public class CmdPaystubApprove extends Subcommand {
 		PayRequest req = NeoPaystub.getRequests().get((r) -> {
 			return id - r.getId();
 		});
+		if (req == null) {
+			Util.msg(s, "&cThat pay request doesn't exist! Maybe it was already processed?");
+			return;
+		}
+		if (req.isProcessed()) {
+			Util.msg(s, "&cThat pay request was already processed!");
+			return;
+		}
+		req.process(true);
 		Util.msg(s, "&7Attempting to pay &c" + req.getDisplay() + "&7...");
 		
 		NeoPaystub.inst().getProxy().getScheduler().runAsync(NeoPaystub.inst(), () -> {
 			if (NeoPaystub.pay(req.getUniqueId(), req.getAmount())) {
-				Util.msg(s, "&7Successfully paid &c" + req.getDisplay() + " &e" + req.getAmount() + " points &7for " + req.getNote());
+				Util.msg(s, "&7Successfully paid &c" + req.getDisplay() + " &e$" + req.getAmount() + " &7for " + req.getNote());
 				ProxiedPlayer recipient = NeoPaystub.inst().getProxy().getPlayer(req.getUniqueId());
 				if (recipient != null) {
-					Util.msg(recipient, "&7You just received &e" + req.getAmount() + " points &7for " + req.getNote() + "&7! &c/paystub");
+					Util.msg(recipient, "&7You just received &e$" + req.getAmount() + " &7for " + req.getNote() + "&7! &c/paystub");
 				}
 				NeoPaystub.proxy().getPluginManager().dispatchCommand(NeoPaystub.proxy().getConsole(), "/mail " + req.getDisplay() +
 						" Your pay request " + req.getId() + " (" + req.getNote() + ") was approved. /paystub");
@@ -40,6 +49,7 @@ public class CmdPaystubApprove extends Subcommand {
 				});
 			}
 			else {
+				req.revertProcess();
 				Util.msg(s, "&cFailed to complete payment! Check the console");
 			}
 		});

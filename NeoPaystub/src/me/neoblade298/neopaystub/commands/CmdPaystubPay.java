@@ -12,9 +12,9 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
-public class CmdPaystubGive extends Subcommand {
+public class CmdPaystubPay extends Subcommand {
 
-	public CmdPaystubGive(String key, String desc, String perm, SubcommandRunner runner) {
+	public CmdPaystubPay(String key, String desc, String perm, SubcommandRunner runner) {
 		super(key, desc, perm, runner);
 		args.add(new Arg("player"), new Arg("amount"));
 		color = ChatColor.DARK_RED;
@@ -33,13 +33,13 @@ public class CmdPaystubGive extends Subcommand {
 		
 		NeoPaystub.inst().getProxy().getScheduler().runAsync(NeoPaystub.inst(), () -> {
 			if (NeoPaystub.pay(uuid, amount)) {
-				Util.msg(s, "&7Successfully paid &c" + display + " &e" + amount + " points");
+				Util.msg(s, "&7Successfully paid &c" + display + " &e$" + amount);
 				ProxiedPlayer recipient = NeoPaystub.inst().getProxy().getPlayer(uuid);
 				if (recipient != null) {
-					Util.msg(recipient, "&7You just received &e" + amount + " points for usage in the MLMC shop! &c/paystub");
+					Util.msg(recipient, "&7You just received &e$" + amount + " &7for usage in the MLMC shop! &c/paystub");
 				}
 				NeoPaystub.proxy().getPluginManager().dispatchCommand(NeoPaystub.proxy().getConsole(), "/mail " + display +
-						" You received " + amount + " points for usage in the MLMC shop! /paystub");
+						" You received $" + amount + " for usage in the MLMC shop! /paystub");
 			}
 			else {
 				Util.msg(s, "&cFailed to complete payment! Check the console");

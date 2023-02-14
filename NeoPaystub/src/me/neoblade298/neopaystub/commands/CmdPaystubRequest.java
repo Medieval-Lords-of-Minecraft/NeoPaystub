@@ -1,6 +1,12 @@
 package me.neoblade298.neopaystub.commands;
 
 import me.neoblade298.neocore.bungee.util.Util;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+import me.neoblade298.neocore.bungee.BungeeCore;
 import me.neoblade298.neocore.bungee.commands.Subcommand;
 import me.neoblade298.neocore.shared.commands.Arg;
 import me.neoblade298.neocore.shared.commands.SubcommandRunner;
@@ -20,10 +26,16 @@ public class CmdPaystubRequest extends Subcommand {
 
 	@Override
 	public void run(CommandSender s, String[] args) {
-		NeoPaystub.addRequest(new PayRequest((ProxiedPlayer) s, Integer.parseInt(args[0]), SharedUtil.connectArgs(args, 1)));
+		String note = SharedUtil.connectArgs(args, 1).replaceAll("'", "\\\\'");
+		if (note.length() > 80) {
+			Util.msg(s, "&cNote must be less than 80 characters!");
+			return;
+		}
+		PayRequest req = new PayRequest((ProxiedPlayer) s, Integer.parseInt(args[0]), SharedUtil.connectArgs(args, 1));
+		NeoPaystub.addRequest(req);
 		Util.msg(s, "&7Successfully submitted pay request!");
 		for (ProxiedPlayer p : NeoPaystub.proxy().getPlayers()) {
-			if (p.hasPermission("neopaystub.admin")) {
+			if (p.hasPermission("paystub.admin")) {
 				Util.msg(p, "&7A new pay request has been submitted! &c/paystub list&7!");
 			}
 		}

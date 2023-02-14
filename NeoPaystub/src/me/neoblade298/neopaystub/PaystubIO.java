@@ -25,7 +25,7 @@ public class PaystubIO implements Listener {
 					Statement stmt = con.createStatement();
 					ResultSet rs = stmt.executeQuery("SELECT * FROM paystub_accounts WHERE uuid = '" + uuid + "';")) {
 				if (rs.next()) {
-					accounts.put(uuid, new PaystubAccount(uuid, rs.getInt("id"), rs.getString("code")));
+					accounts.put(uuid, new PaystubAccount(rs));
 				}
 			} catch (SQLException ex) {
 				ex.printStackTrace();
@@ -39,5 +39,9 @@ public class PaystubIO implements Listener {
 	
 	public static boolean hasAccount(UUID uuid) {
 		return accounts.get(uuid) != null;
+	}
+	
+	public static void addAccount(UUID uuid, PaystubAccount acct) {
+		accounts.put(uuid, acct);
 	}
 }

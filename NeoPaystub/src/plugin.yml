@@ -1,11 +1,10 @@
-name: NeoBase
-main: me.neoblade298.base.Main
+name: NeoPaystub
+main: me.neoblade298.neopaystub.NeoPaystub
 author: [Neoblade298]
-depend: [NeoCore]
+depends: [NeoCore]
 version: 1.0
 api-version: 1.16
 commands:
-   disenchant:
-      description: This command allows you to disenchant item in hand
-      usage: /disenchant
-      permission: disenchant.true
+   paystub:
+      description: Main command
+      usage: /paystub

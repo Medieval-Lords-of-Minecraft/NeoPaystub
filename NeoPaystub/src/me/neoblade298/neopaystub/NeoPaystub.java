@@ -1,5 +1,6 @@
 package me.neoblade298.neopaystub;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -11,8 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.UUID;
-
-import org.bukkit.Bukkit;
+import java.util.logging.Logger;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -38,12 +38,22 @@ public class NeoPaystub extends Plugin {
 		// Bukkit.getPluginManager().registerEvents(this, this);
 		initCommands();
 		
+    	BungeeCore.loadFiles(new File(this.getDataFolder(), "config.yml"), (yml, cfg) -> {
+    		token = yml.getString("token");
+    	});
+    	
+    	getProxy().getPluginManager().registerListener(this, new PaystubIO());
+		
 		// Load paystub requests
 		try (Connection con = BungeeCore.getConnection("NeoPaystub");
-				Statement stmt = con.createStatement();
-				ResultSet rs = stmt.executeQuery("SELECT * FROM paystub_requests ORDER BY id DESC;")) {
+				Statement stmt = con.createStatement()) {;
+			ResultSet rs = stmt.executeQuery("SELECT * FROM paystub_requests WHERE processtime = 0 ORDER BY id ASC;");
 			while (rs.next()) {
 				requests.add(new PayRequest(rs));
+			}
+			rs = stmt.executeQuery("SELECT MAX(id) as id FROM paystub_requests");
+			if (rs.next()) {
+				PayRequest.setNextId(rs.getInt("id") + 1);
 			}
 		} catch (SQLException ex) {
 			ex.printStackTrace();
@@ -51,11 +61,12 @@ public class NeoPaystub extends Plugin {
 	}
 	
 	private void initCommands() {
-		SubcommandManager mngr = new SubcommandManager("paystub", "paystub.use", ChatColor.RED, this);
+		SubcommandManager mngr = new SubcommandManager("paystub", "paystub.use", ChatColor.RED, this, new String[] {"ps"});
+		mngr.registerCommandList("help");
 		mngr.register(new CmdPaystub("", "Checks your account", null, SubcommandRunner.BOTH));
 		mngr.register(new CmdPaystubApprove("approve", "Approves a pay request", "paystub.admin", SubcommandRunner.BOTH));
 		mngr.register(new CmdPaystubDeny("deny", "Denies a pay request", "paystub.admin", SubcommandRunner.BOTH));
-		mngr.register(new CmdPaystubGive("give", "Gives points to a player (can be negative)", "paystub.admin", SubcommandRunner.BOTH));
+		mngr.register(new CmdPaystubPay("pay", "Pays shop money to a player (can be negative)", "paystub.admin", SubcommandRunner.BOTH));
 		mngr.register(new CmdPaystubList("list", "Lists existing pay requests", "paystub.admin", SubcommandRunner.BOTH));
 		mngr.register(new CmdPaystubRequest("request", "Requests payment for a job", "paystub.staff", SubcommandRunner.BOTH));
 	}
@@ -98,6 +109,7 @@ public class NeoPaystub extends Plugin {
 	}
 	
 	private static boolean payToId(int id, int amount) {
+		Logger log = inst.getProxy().getLogger();
 		try {
 	        HttpClient client = HttpClient.newHttpClient();
 	        HttpRequest request = HttpRequest.newBuilder()
@@ -112,12 +124,12 @@ public class NeoPaystub extends Plugin {
 	        if (response.statusCode() == 200) {
 	        	JsonObject data = JsonParser.parseString(response.body()).getAsJsonObject().get("data").getAsJsonObject();
 	        	int after = data.get("amount").getAsInt();
-	        	Bukkit.getLogger().info("[NeoPaystub] Successfully paid " + amount + " to id " + id + ", now has " + after);
+	        	log.info("[NeoPaystub] Successfully paid " + amount + " to id " + id + ", now has " + after);
 	        	return true;
 	        }
 	        else {
-	        	Bukkit.getLogger().warning("[NeoPaystub] " + response.body());
-	        	Bukkit.getLogger().warning("[NeoPaystub] Failed to pay " + amount + " to id " + id);
+	        	log.warning("[NeoPaystub] " + response.body());
+	        	log.warning("[NeoPaystub] Failed to pay " + amount + " to id " + id);
 	        }
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
@@ -131,6 +143,7 @@ public class NeoPaystub extends Plugin {
 	
 	// Returns id of gift card
 	public static int createAccount(UUID uuid, int amount) {
+		Logger log = inst.getProxy().getLogger();
 		try {
 	        HttpClient client = HttpClient.newHttpClient();
 	        HttpRequest request = HttpRequest.newBuilder()
@@ -147,12 +160,13 @@ public class NeoPaystub extends Plugin {
 	        	int id = data.get("id").getAsInt();
 	        	String code = data.get("code").getAsString();
 	        	int actualAmount = data.get("amount").getAsInt();
-	        	Bukkit.getLogger().info("[NeoPaystub] Successfully created account for user " + uuid + " with id " + id + ", code " + code + ", amount " + actualAmount);
+	        	PaystubIO.addAccount(uuid, new PaystubAccount(uuid, id, code));
+	        	log.info("[NeoPaystub] Successfully created account for user " + uuid + " with id " + id + ", code " + code + ", amount " + actualAmount);
 	        	return id;
 	        }
 	        else {
-	        	Bukkit.getLogger().warning("[NeoPaystub] " + response.body());
-	        	Bukkit.getLogger().warning("[NeoPaystub] Failed to create account for user " + uuid);
+	        	log.warning("[NeoPaystub] " + response.body());
+	        	log.warning("[NeoPaystub] Failed to create account for user " + uuid);
 	        }
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
@@ -165,6 +179,7 @@ public class NeoPaystub extends Plugin {
 	}
 	
 	public static JsonObject viewBalance(int id) {
+		Logger log = inst.getProxy().getLogger();
 		try {
 	        HttpClient client = HttpClient.newHttpClient();
 	        HttpRequest request = HttpRequest.newBuilder()
@@ -180,8 +195,8 @@ public class NeoPaystub extends Plugin {
 	        	return JsonParser.parseString(response.body()).getAsJsonObject().get("data").getAsJsonObject();
 	        }
 	        else {
-	        	Bukkit.getLogger().warning("[NeoPaystub] " + response.body());
-	        	Bukkit.getLogger().warning("[NeoPaystub] Failed to receive gift card id " + id);
+	        	log.warning("[NeoPaystub] " + response.body());
+	        	log.warning("[NeoPaystub] Failed to receive gift card id " + id);
 	        }
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
