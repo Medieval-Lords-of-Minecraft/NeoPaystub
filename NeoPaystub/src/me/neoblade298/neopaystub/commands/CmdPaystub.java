@@ -30,6 +30,10 @@ public class CmdPaystub extends Subcommand {
 	@Override
 	public void run(CommandSender s, String[] args) {
 		if (args.length != 0) {
+			if (s.hasPermission("paystub.admin")) {
+				Util.msg(s, "&c You don't have permission for that! paystub.admin");
+				return;
+			}
 			ProxiedPlayer p = NeoPaystub.inst().getProxy().getPlayer("player");
 			if (p == null) {
 				Util.msg(s, "&cThat player isn't online!");
