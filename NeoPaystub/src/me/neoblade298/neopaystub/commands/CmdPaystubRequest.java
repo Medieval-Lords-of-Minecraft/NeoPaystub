@@ -2,11 +2,6 @@ package me.neoblade298.neopaystub.commands;
 
 import me.neoblade298.neocore.bungee.util.Util;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
-
-import me.neoblade298.neocore.bungee.BungeeCore;
 import me.neoblade298.neocore.bungee.commands.Subcommand;
 import me.neoblade298.neocore.shared.commands.Arg;
 import me.neoblade298.neocore.shared.commands.SubcommandRunner;

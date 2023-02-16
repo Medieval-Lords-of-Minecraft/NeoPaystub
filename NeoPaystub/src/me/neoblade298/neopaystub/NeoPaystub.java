@@ -61,7 +61,7 @@ public class NeoPaystub extends Plugin {
 	}
 	
 	private void initCommands() {
-		SubcommandManager mngr = new SubcommandManager("paystub", "paystub.use", ChatColor.RED, this, new String[] {"ps"});
+		SubcommandManager mngr = new SubcommandManager("paystub", "paystub.use", ChatColor.RED, this);
 		mngr.registerCommandList("help");
 		mngr.register(new CmdPaystub("", "Checks your account", null, SubcommandRunner.BOTH));
 		mngr.register(new CmdPaystubApprove("approve", "Approves a pay request", "paystub.admin", SubcommandRunner.BOTH));
