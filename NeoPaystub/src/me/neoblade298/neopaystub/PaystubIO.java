@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.UUID;
 
 import me.neoblade298.neocore.bungee.BungeeCore;
+import me.neoblade298.neocore.bungee.util.Util;
 import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
@@ -29,6 +30,10 @@ public class PaystubIO implements Listener {
 				}
 			} catch (SQLException ex) {
 				ex.printStackTrace();
+			}
+			
+			if (NeoPaystub.getRequests().size() > 0 && e.getPlayer().hasPermission("neopaystub.admin")) {
+				Util.msg(e.getPlayer(), "&cThere are paystub requests waiting to be processed!");
 			}
 		});
 	}
