@@ -66,11 +66,11 @@ public class CmdPaystub extends Subcommand {
 			JsonObject data = NeoPaystub.viewBalance(id);
 			Util.msg(s, "&7Player: &e" + viewed.getName());
 			Util.msg(s, "&7Balance: &e$" + data.get("amountRemaining").getAsInt());
-			Util.msg(s, "&7Code (Click below and press Ctrl+A to copy):");
+			Util.msg(s, "&7Code (Click to copy):");
 			String code = data.get("code").getAsString();
 			ComponentBuilder b = new ComponentBuilder("§e" + code)
-					.event(new HoverEvent(Action.SHOW_TEXT, new Text("Click to get code in your chat")))
-					.event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, code));
+					.event(new HoverEvent(Action.SHOW_TEXT, new Text("Click to copy to clipboard")))
+					.event(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, code));
 			s.sendMessage(b.create());
 		});
 	}
