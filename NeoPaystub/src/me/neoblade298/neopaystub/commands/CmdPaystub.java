@@ -30,7 +30,7 @@ public class CmdPaystub extends Subcommand {
 	@Override
 	public void run(CommandSender s, String[] args) {
 		if (args.length != 0) {
-			if (s.hasPermission("paystub.admin")) {
+			if (!s.hasPermission("paystub.admin")) {
 				Util.msg(s, "&c You don't have permission for that! paystub.admin");
 				return;
 			}
