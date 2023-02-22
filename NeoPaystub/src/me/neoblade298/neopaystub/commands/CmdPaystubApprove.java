@@ -42,7 +42,7 @@ public class CmdPaystubApprove extends Subcommand {
 				if (recipient != null) {
 					Util.msg(recipient, "&7You just received &e$" + req.getAmount() + " &7for " + req.getNote() + "&7! &c/paystub");
 				}
-				NeoPaystub.proxy().getPluginManager().dispatchCommand(NeoPaystub.proxy().getConsole(), "/mail " + req.getDisplay() +
+				NeoPaystub.proxy().getPluginManager().dispatchCommand(NeoPaystub.proxy().getConsole(), "mail " + req.getDisplay() +
 						" Your pay request " + req.getId() + " (" + req.getNote() + ") was approved. /paystub");
 				NeoPaystub.getRequests().remove((r) -> {
 					return id - r.getId();

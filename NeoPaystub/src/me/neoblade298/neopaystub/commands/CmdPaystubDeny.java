@@ -41,7 +41,7 @@ public class CmdPaystubDeny extends Subcommand {
 		if (recipient != null) {
 			Util.msg(recipient, "&cYour pay request was just denied for: " + reason);
 		}
-		NeoPaystub.proxy().getPluginManager().dispatchCommand(NeoPaystub.proxy().getConsole(), "/mail " + req.getDisplay() +
+		NeoPaystub.proxy().getPluginManager().dispatchCommand(NeoPaystub.proxy().getConsole(), "mail " + req.getDisplay() +
 				" Your pay request " + req.getId() + " (" + req.getNote() + ") was denied for: " + reason);
 	}
 

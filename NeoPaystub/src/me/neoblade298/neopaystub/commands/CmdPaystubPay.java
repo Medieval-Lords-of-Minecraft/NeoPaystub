@@ -38,7 +38,7 @@ public class CmdPaystubPay extends Subcommand {
 				if (recipient != null) {
 					Util.msg(recipient, "&7You just received &e$" + amount + " &7for usage in the MLMC shop! &c/paystub");
 				}
-				NeoPaystub.proxy().getPluginManager().dispatchCommand(NeoPaystub.proxy().getConsole(), "/mail " + display +
+				NeoPaystub.proxy().getPluginManager().dispatchCommand(NeoPaystub.proxy().getConsole(), "mail " + display +
 						" You received $" + amount + " for usage in the MLMC shop! /paystub");
 			}
 			else {
